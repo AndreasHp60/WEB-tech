@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <title>D3-eksempel</title>
+    <script type="text/javascript" src="d3.js"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <h1>Beer consumption in beer cans</h1>
+    <script type="text/javascript">
+// Indlæsning af filen country.csv
+d3.csv("alcohol-consumption.csv").then(function(data) {
+  // Dataopsamling i et array.
+  let opsamling = []; // TODO: Skal justeres så det passer med antal opsamlingspunkter
+  let countries = []
+
+  // Dataopsamling med et for loop
+  for (row of data) {
+    countries.push(row.Country)
+    opsamling.push(row["Liters of pure alcohol consumed per capita"])
+  }
+  console.log(countries)
+  console.log(opsamling)
+  
+  // Printer opsamlingen ud
+
+
+    // Width and height
+    const w = 1300;
+    const h = 750;
+    const barPadding = 5;
+    const padding = -10
+
+    let xScale = d3.scaleLinear()
+                .domain([0, d3.max(opsamling, function(d) { return d})])
+                .range([0, w - 300])
+    
+    let xScale2 = d3.scaleLinear()
+                .domain([0, d3.max(opsamling, function(d) { return d * 60})])
+                .range([w - 300, 0])
+
+    // Create SVG element
+    const svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h + 50);
+
+
+    // TODO: Lav visualiseringen her! (fx barchart)
+    svg.selectAll("rect")
+          .data(opsamling)
+          .enter()
+          .append("rect")
+          .attr("y", function(d, i) {
+              return i * (h / opsamling.length);
+          })
+          .attr("x", function(d) {
+              return w - xScale(d) - 160;
+          })
+          .attr("height", h / opsamling.length - barPadding)
+          .attr("width", function(d) {
+              return xScale(d);
+          })
+          .style("fill", function(d) {
+            return "rgb(254, " + (210 - Math.round(d*7)) +", 38)"
+          })
+
+    // TEXT TIL BARCHART
+    // hallooooo
+    //Text sizing
+    textSize = "20px"
+    svg.selectAll("text")
+          .data(opsamling)
+          .enter()
+          .append("text")
+          .text(function(d) {
+            return d * 20 * 3 + " 🍺";
+          })
+          .attr("y", function(d, i) {
+              return i * (h / opsamling.length) + 22;
+          })
+          .attr("x", function(d) {
+              return w - xScale(d) - 170;
+          })
+          .attr("font-family", "sans-serif")
+          .attr("font-size", textSize)
+          .attr("fill", "black")
+          .attr("text-anchor", "end")
+    
+    //country Labels
+    textSizeInt = parseInt(textSize.substring(0,2))
+    yLabel = (((h / opsamling.length - barPadding) - textSizeInt) / 2) + textSizeInt - barPadding
+    for (let label of countries) {
+      svg.append("text")
+        .attr("y", yLabel)
+        .attr("x", w - 150)
+        .style("fill", "black")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "20px")
+        .attr("text-anchor", "start")
+        .text(label);
+      yLabel += h / opsamling.length
+    }
+    
+  var xAxis = d3.axisBottom(xScale2);
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate("+ 139 +"," + (h - padding) + ")")
+    .call(xAxis);
+
+//SLUT KODE
+});
+    </script>
+  </body>
+</html>
